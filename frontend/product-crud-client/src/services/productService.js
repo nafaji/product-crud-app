@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Update this if your API runs on a different port (check Properties/launchSettings.json
 // in the backend project, or the console output when you run `dotnet run`).
-const API_BASE_URL = "https://127.0.0.1:7080/api/products";
+const API_BASE_URL = "http://127.0.0.1:8080/api/products";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
