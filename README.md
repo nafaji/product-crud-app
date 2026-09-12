@@ -1,4 +1,4 @@
-# Product CRUD — React + ASP.NET Core + SQL Server + Tailwind CSS
+# ProductHub CRM — Full-Stack Product Management App with React, ASP.NET Core, SQL Server, and Tailwind CSS
 
 This project is a full-stack inventory management app built to demonstrate a working CRUD flow using modern web and backend tooling. It includes a React frontend, an ASP.NET Core Web API, and a SQL Server database, all connected in a simple developer-friendly setup.
 
