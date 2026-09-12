@@ -1,0 +1,43 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Node / frontend
+frontend/product-crud-client/node_modules/
+frontend/product-crud-client/dist/
+frontend/product-crud-client/.vite/
+frontend/product-crud-client/npm-debug.log*
+frontend/product-crud-client/yarn-debug.log*
+frontend/product-crud-client/yarn-error.log*
+
+# .NET / backend
+backend/ProductApi/bin/
+backend/ProductApi/obj/
+backend/ProductApi/*.user
+backend/ProductApi/*.suo
+backend/ProductApi/.vs/
+backend/ProductApi/.idea/
+backend/ProductApi/.vscode/
+
+# ASP.NET / EF
+**/appsettings.Development.json
+**/secrets.json
+**/*.db
+**/*.db-shm
+**/*.db-wal
+**/*.pdb
+**/*.deps.json
+**/*.runtimeconfig.json
+**/*.staticwebassets.*
+
+# Test / coverage
+coverage/
+*.coverage
+*.lcov
+
+# Logs
+*.log
