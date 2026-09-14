@@ -1,44 +1,49 @@
-# ProductHub CRM — Full-Stack Product Management App with React, ASP.NET Core, SQL Server, and Tailwind CSS
+# Product CRUD — React + ASP.NET Core + SQL Server + Tailwind CSS
 
-This project is a full-stack inventory management app built to demonstrate a working CRUD flow using modern web and backend tooling. It includes a React frontend, an ASP.NET Core Web API, and a SQL Server database, all connected in a simple developer-friendly setup.
+This project is a full-stack inventory management application built to demonstrate a working CRUD workflow across a modern React frontend, an ASP.NET Core Web API, and a SQL Server database. It is designed as a practical starter app for managing products, categories, and units in a clean, production-style structure.
 
-The app is designed around a product catalog where users can:
+The application supports:
 
-- view all products
-- create new products
-- update product details
-- delete products
-- manage stock and pricing information
+- viewing products, categories, and units
+- creating and editing records
+- deleting records with confirmation
+- tracking stock and pricing
+- using a relational database for persistence
+- running the full stack locally via Docker Compose
 
-## Project overview
+## Overview
 
-The app is split into two main parts:
+The project is split into three main parts:
 
-- Backend: ASP.NET Core 8 Web API with Entity Framework Core and SQL Server
-- Frontend: React + Vite + Tailwind CSS + Axios
+- Frontend: React + Vite + Tailwind CSS
+- Backend: ASP.NET Core 8 Web API
+- Database: SQL Server 2022
 
-This makes it a good example of a practical full-stack architecture using a traditional API and a modern UI layer.
+This gives a simple and realistic example of a full-stack architecture using a REST API and a modern single-page frontend.
 
-### Tech stack
+## Tech stack
 
-- ASP.NET Core 8 Web API
+- ASP.NET Core 8
 - Entity Framework Core
 - SQL Server 2022
 - React
 - Vite
 - Tailwind CSS
+- Axios
 - Docker + Docker Compose
 
 ## Features
 
-- Product listing screen
-- Create product form
-- Edit product flow
-- Delete confirmation dialog
-- Toast notifications
-- REST API with CRUD endpoints
-- SQL-backed persistence with automatic migrations
-- Dockerized local development setup
+- Product management with CRUD operations
+- Category management
+- Unit management
+- Search and filtering
+- Stock and pricing fields
+- Seeded sample data
+- REST API with validation
+- Automatic EF Core migrations on startup
+- Dockerized local development
+- Toast notifications and confirmation dialogs
 
 ## Project structure
 
@@ -68,14 +73,12 @@ product-crud-app/
 ├── .gitignore
 ├── .dockerignore
 ├── README.md
-└── .env.example (optional, if used later)
+└── LICENSE
 ```
 
 ## Quick start with Docker Compose
 
-This is the easiest way to run the entire project locally.
-
-From the project root:
+The simplest way to run the project is from the root folder:
 
 ```bash
 docker compose up --build
@@ -84,61 +87,51 @@ docker compose up --build
 After startup:
 
 - Frontend: http://localhost:5173
-- Backend API: http://localhost:8080/api/products
+- Backend API: http://localhost:8080
 - SQL Server: localhost:1433
 
-The Compose file starts:
+This Compose setup runs:
 
-- SQL Server container
+- SQL Server database container
 - ASP.NET Core backend container
 - React frontend container
 
-## Manual setup
+## Local development
 
-### 1. Backend setup
+### 1. Backend
 
-**Requirements:** .NET 8 SDK, SQL Server (local, Docker, or Azure SQL), EF Core CLI tools.
+Requirements:
+
+- .NET 8 SDK
+- SQL Server or Docker-backed SQL Server
 
 ```bash
 cd backend/ProductApi
-
 dotnet restore
-
-dotnet tool install --global dotnet-ef
-
-# Optional: verify/update the connection string if needed
-# "DefaultConnection": "Server=localhost,1433;Database=ProductCrudDb;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;"
-
-# Create migrations if needed
-dotnet ef migrations add InitialCreate
-
-# Run the API
 dotnet run
 ```
 
-In this environment, the app was verified on:
+The API will be available at:
 
-- https://127.0.0.1:7080
-- http://127.0.0.1:8080
+- http://localhost:8080
+- Swagger UI: http://localhost:8080/swagger
 
-The default ASP.NET ports may be blocked in some local environments, so if the backend does not start on the default ports, check `Properties/launchSettings.json` and update the frontend `API_BASE_URL` to match.
+### 2. Database
 
-Swagger UI is available at `/swagger` in development.
+The app expects a SQL Server database named `ProductCrudDb`.
 
-### 2. Database setup
-
-If you do not have SQL Server installed locally, run it with Docker:
+If you want to start SQL Server manually:
 
 ```bash
 docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=YourStrong@Passw0rd" \
   -p 1433:1433 --name sql-server -d mcr.microsoft.com/mssql/server:2022-latest
 ```
 
-This container exposes SQL Server on port `1433` and is used by the API connection string.
+### 3. Frontend
 
-### 3. Frontend setup
+Requirements:
 
-**Requirements:** Node.js 18+
+- Node.js 18+
 
 ```bash
 cd frontend/product-crud-client
@@ -146,60 +139,81 @@ npm install
 npm run dev
 ```
 
-Open:
+Then open:
 
 - http://localhost:5173
 
-Before running, confirm `API_BASE_URL` in `src/services/productService.js` matches the backend port you started. In this project, that value is:
-
-```js
-https://127.0.0.1:7080/api/products
-```
-
 ## API endpoints
+
+### Products
 
 | Method | Route              | Description          |
 | ------ | ------------------ | -------------------- |
-| GET    | /api/products      | List all products    |
-| GET    | /api/products/{id} | Get one product      |
-| POST   | /api/products      | Create a new product |
+| GET    | /api/products      | Get all products     |
+| GET    | /api/products/{id} | Get a single product |
+| POST   | /api/products      | Create a product     |
 | PUT    | /api/products/{id} | Update a product     |
 | DELETE | /api/products/{id} | Delete a product     |
+
+### Categories
+
+| Method | Route                | Description        |
+| ------ | -------------------- | ------------------ |
+| GET    | /api/categories      | Get all categories |
+| GET    | /api/categories/{id} | Get a category     |
+| POST   | /api/categories      | Create a category  |
+| PUT    | /api/categories/{id} | Update a category  |
+| DELETE | /api/categories/{id} | Delete a category  |
+
+### Units
+
+| Method | Route           | Description   |
+| ------ | --------------- | ------------- |
+| GET    | /api/units      | Get all units |
+| GET    | /api/units/{id} | Get a unit    |
+| POST   | /api/units      | Create a unit |
+| PUT    | /api/units/{id} | Update a unit |
+| DELETE | /api/units/{id} | Delete a unit |
+
+## Data model
+
+The application includes the following main entities:
+
+- Product
+- Category
+- Unit
+
+Each product contains the following key information:
+
+- product code
+- name and description
+- category relationship
+- unit relationship
+- purchase price
+- selling price
+- opening stock
+- minimum stock level
+- active status
+- created and updated timestamps
 
 ## Architecture
 
 ```mermaid
 flowchart LR
-    User[User] --> Frontend[React + Vite + Tailwind Frontend]
+    User[User] --> Frontend[React + Vite + Tailwind]
     Frontend --> API[ASP.NET Core Web API]
     API --> DB[(SQL Server)]
 ```
 
-This architecture demonstrates a common modern web stack where the frontend communicates with a REST API, and the API persists data in a relational database.
-
 ## Notes
 
-- CORS is configured in `Program.cs` to allow requests from the React app running on `http://localhost:5173` and `http://localhost:3000`.
-- The database is seeded with sample products via EF Core `HasData` in `ApplicationDbContext.cs`.
-- When the application starts, pending migrations are applied automatically.
-- To reset the database, remove it and re-run the migration or application startup.
-- This project is intentionally straightforward and suitable as a learning project, demo app, or base for a product catalog application.
-
-## Why this project is useful
-
-This repository demonstrates a realistic, full-stack development workflow:
-
-- backend API design
-- database-driven persistence
-- frontend state and form handling
-- CRUD patterns
-- API integration with Axios
-- local development using Docker and standard .NET tooling
-
-It is a practical starting point for building a larger business app with inventory, catalog, or sales features.
+- CORS is enabled for the frontend running on localhost ports 5173 and 3000.
+- EF Core automatically applies pending migrations at startup.
+- Sample master data for categories and units is seeded into the database.
+- The app is designed for local development and demo use, but it can also be extended into a real inventory or catalog solution.
 
 ## GitHub project description
 
-Product CRUD is a full-stack inventory management app built with React, ASP.NET Core Web API, SQL Server, and Tailwind CSS. It provides a complete CRUD experience for managing products, including create, read, update, delete, pricing, stock tracking, and a clean UI for inventory operations.
+Product CRUD is a full-stack inventory management application built with React, ASP.NET Core, SQL Server, and Tailwind CSS. It allows users to manage products, categories, and units through a clean interface and a reliable REST API. The app is designed as a simple but realistic business application, with stock, pricing, and catalog management features built in.
 
-The project includes a Docker Compose setup for running the database, API, and frontend together locally, making it easy to demo or extend for real-world product catalog scenarios.
+It includes a Docker Compose setup for running the database, API, and frontend together locally, making it easy to demo, test, and extend.

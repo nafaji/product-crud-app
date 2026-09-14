@@ -1,0 +1,12 @@
+D:\MyApplications\product-crud-app\backend\InventoryManagementSystem.Domain\bin\Release\net10.0\InventoryManagementSystem.Domain.deps.json
+D:\MyApplications\product-crud-app\backend\InventoryManagementSystem.Domain\bin\Release\net10.0\InventoryManagementSystem.Domain.dll
+D:\MyApplications\product-crud-app\backend\InventoryManagementSystem.Domain\bin\Release\net10.0\InventoryManagementSystem.Domain.pdb
+D:\MyApplications\product-crud-app\backend\InventoryManagementSystem.Domain\obj\Release\net10.0\InventoryManagementSystem.Domain.GeneratedMSBuildEditorConfig.editorconfig
+D:\MyApplications\product-crud-app\backend\InventoryManagementSystem.Domain\obj\Release\net10.0\InventoryManagementSystem.Domain.AssemblyInfoInputs.cache
+D:\MyApplications\product-crud-app\backend\InventoryManagementSystem.Domain\obj\Release\net10.0\InventoryManagementSystem.Domain.AssemblyInfo.cs
+D:\MyApplications\product-crud-app\backend\InventoryManagementSystem.Domain\obj\Release\net10.0\InventoryManagementSystem.Domain.csproj.CoreCompileInputs.cache
+D:\MyApplications\product-crud-app\backend\InventoryManagementSystem.Domain\obj\Release\net10.0\InventoryManagementSystem.Domain.sourcelink.json
+D:\MyApplications\product-crud-app\backend\InventoryManagementSystem.Domain\obj\Release\net10.0\InventoryManagementSystem.Domain.dll
+D:\MyApplications\product-crud-app\backend\InventoryManagementSystem.Domain\obj\Release\net10.0\refint\InventoryManagementSystem.Domain.dll
+D:\MyApplications\product-crud-app\backend\InventoryManagementSystem.Domain\obj\Release\net10.0\InventoryManagementSystem.Domain.pdb
+D:\MyApplications\product-crud-app\backend\InventoryManagementSystem.Domain\obj\Release\net10.0\ref\InventoryManagementSystem.Domain.dll

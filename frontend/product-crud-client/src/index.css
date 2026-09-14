@@ -2,7 +2,37 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  color: #1c2321;
+  background-color: #f3f5f2;
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+  height: 100%;
+}
+
+* {
+  box-sizing: border-box;
+}
+
 body {
-  background-color: #F3F5F2;
-  color: #1C2321;
+  margin: 0;
+  background: linear-gradient(180deg, #f5f3ef 0%, #eef2ee 100%);
+  color: #1c2321;
+}
+
+button,
+input {
+  font: inherit;
 }
