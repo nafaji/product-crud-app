@@ -1,62 +1,104 @@
-# Product CRUD — React + ASP.NET Core + SQL Server + Tailwind CSS
+# Product CRUD Inventory Management System
 
-This project is a full-stack inventory management application built to demonstrate a working CRUD workflow across a modern React frontend, an ASP.NET Core Web API, and a SQL Server database. It is designed as a practical starter app for managing products, categories, and units in a clean, production-style structure.
+This project is a full-stack inventory management application built with React, ASP.NET Core, and SQL Server. It is designed for managing products, categories, units, suppliers, and stock movement activity in a clean, operational workflow.
 
-The application supports:
+The application includes:
 
-- viewing products, categories, and units
-- creating and editing records
-- deleting records with confirmation
-- tracking stock and pricing
-- using a relational database for persistence
-- running the full stack locally via Docker Compose
+- product catalog management with CRUD operations
+- category, unit, and supplier setup
+- stock movement tracking
+- low-stock alerts and reorder suggestions
+- inventory dashboard analytics
+- seeded master data and EF Core migrations
+- Docker-based local development setup
 
 ## Overview
 
-The project is split into three main parts:
+The solution is split into:
 
 - Frontend: React + Vite + Tailwind CSS
-- Backend: ASP.NET Core 8 Web API
+- Backend: ASP.NET Core Web API
 - Database: SQL Server 2022
+- Domain model: .NET entity classes and EF Core configuration
 
-This gives a simple and realistic example of a full-stack architecture using a REST API and a modern single-page frontend.
+This gives a practical full-stack example of a business inventory application with a REST API, relational database, and modern UI.
 
 ## Tech stack
 
-- ASP.NET Core 8
+- ASP.NET Core Web API
+- .NET 10
 - Entity Framework Core
 - SQL Server 2022
-- React
+- React 18
 - Vite
 - Tailwind CSS
 - Axios
-- Docker + Docker Compose
+- Docker Compose
 
 ## Features
 
-- Product management with CRUD operations
-- Category management
-- Unit management
-- Search and filtering
-- Stock and pricing fields
-- Seeded sample data
-- REST API with validation
-- Automatic EF Core migrations on startup
-- Dockerized local development
-- Toast notifications and confirmation dialogs
+### Inventory operations
+
+- Create, edit, and delete products
+- Manage categories, units, and suppliers
+- Search and filter product records
+- Track stock movements and inventory history
+- View product-level stock and minimum stock thresholds
+
+### Inventory monitoring
+
+- Dashboard landing page with key operational metrics
+- Low-stock alerts and warnings
+- Automatic reorder suggestions based on minimum stock
+- Stock movement analytics summary
+- Supplier and category insight overview
+
+### Data management
+
+- Seeded catalog data for categories and units
+- Database migrations managed through EF Core
+- Automatic migration application at startup in development
+- Validation and confirmation dialogs in the UI
+- Toast notifications for user feedback
 
 ## Project structure
 
 ```text
 product-crud-app/
 ├── backend/
+│   ├── InventoryManagementSystem.Domain/
+│   │   ├── Entities/
+│   │   │   ├── Category.cs
+│   │   │   ├── Product.cs
+│   │   │   ├── StockMovement.cs
+│   │   │   ├── Supplier.cs
+│   │   │   └── Unit.cs
+│   │   └── InventoryManagementSystem.Domain.csproj
 │   └── ProductApi/
 │       ├── Controllers/
+│       │   ├── CategoriesController.cs
+│       │   ├── ProductsController.cs
+│       │   ├── StockMovementsController.cs
+│       │   ├── SuppliersController.cs
+│       │   └── UnitsController.cs
 │       ├── Data/
+│       │   └── ApplicationDbContext.cs
 │       ├── DTOs/
+│       │   ├── CategoryDto.cs
+│       │   ├── ProductDto.cs
+│       │   ├── StockMovementDto.cs
+│       │   ├── SupplierDto.cs
+│       │   └── UnitDto.cs
 │       ├── Migrations/
-│       ├── Models/
+│       │   ├── 20260912155317_InitialCreate.cs
+│       │   ├── 20260912155317_InitialCreate.Designer.cs
+│       │   ├── 20260912164054_AddInventorySupport.cs
+│       │   ├── 20260912164054_AddInventorySupport.Designer.cs
+│       │   ├── 20260913150229_AddMoreUnits.cs
+│       │   ├── 20260913150229_AddMoreUnits.Designer.cs
+│       │   └── ApplicationDbContextModelSnapshot.cs
 │       ├── Properties/
+│       │   └── launchSettings.json
 │       ├── Program.cs
 │       ├── appsettings.json
 │       ├── appsettings.Development.json
@@ -65,36 +107,62 @@ product-crud-app/
 ├── frontend/
 │   └── product-crud-client/
 │       ├── src/
+│       │   ├── components/
+│       │   │   ├── CategoryForm.jsx
+│       │   │   ├── CategoryTable.jsx
+│       │   │   ├── ConfirmDialog.jsx
+│       │   │   ├── ProductForm.jsx
+│       │   │   ├── ProductTable.jsx
+│       │   │   ├── StockMovementForm.jsx
+│       │   │   ├── StockMovementTable.jsx
+│       │   │   ├── SupplierForm.jsx
+│       │   │   ├── SupplierTable.jsx
+│       │   │   ├── Toast.jsx
+│       │   │   ├── UnitForm.jsx
+│       │   │   └── UnitTable.jsx
+│       │   ├── pages/
+│       │   │   ├── CategoriesPage.jsx
+│       │   │   ├── DashboardPage.jsx
+│       │   │   ├── ProductsPage.jsx
+│       │   │   ├── StockMovementsPage.jsx
+│       │   │   ├── SuppliersPage.jsx
+│       │   │   └── UnitsPage.jsx
+│       │   ├── services/
+│       │   │   ├── inventoryService.js
+│       │   │   └── productService.js
+│       │   ├── App.jsx
+│       │   ├── index.css
+│       │   └── main.jsx
+│       ├── index.html
 │       ├── package.json
-│       ├── vite.config.js
+│       ├── postcss.config.js
 │       ├── tailwind.config.js
+│       ├── vite.config.js
 │       └── Dockerfile
 ├── docker-compose.yml
 ├── .gitignore
 ├── .dockerignore
 ├── README.md
-└── LICENSE
+├── LICENSE
+└── .vscode/
 ```
 
 ## Quick start with Docker Compose
 
-The simplest way to run the project is from the root folder:
+From the root folder, run:
 
 ```bash
 docker compose up --build
 ```
 
-After startup:
+The app will start with:
 
 - Frontend: http://localhost:5173
 - Backend API: http://localhost:8080
+- Swagger: http://localhost:8080/swagger
 - SQL Server: localhost:1433
 
-This Compose setup runs:
-
-- SQL Server database container
-- ASP.NET Core backend container
-- React frontend container
+This compose setup runs the database, API, and UI together in one local workflow.
 
 ## Local development
 
@@ -102,8 +170,8 @@ This Compose setup runs:
 
 Requirements:
 
-- .NET 8 SDK
-- SQL Server or Docker-backed SQL Server
+- .NET 10 SDK
+- SQL Server running locally or via Docker
 
 ```bash
 cd backend/ProductApi
@@ -111,16 +179,17 @@ dotnet restore
 dotnet run
 ```
 
-The API will be available at:
-
-- http://localhost:8080
-- Swagger UI: http://localhost:8080/swagger
+The API is configured to automatically apply pending EF Core migrations on startup.
 
 ### 2. Database
 
-The app expects a SQL Server database named `ProductCrudDb`.
+The application uses the default connection string in appsettings.json:
 
-If you want to start SQL Server manually:
+```json
+"DefaultConnection": "Server=localhost,1433;Database=ProductCrudDb;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;MultipleActiveResultSets=true"
+```
+
+If you want to run SQL Server manually:
 
 ```bash
 docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=YourStrong@Passw0rd" \
@@ -143,7 +212,7 @@ Then open:
 
 - http://localhost:5173
 
-## API endpoints
+## Main API endpoints
 
 ### Products
 
@@ -175,26 +244,59 @@ Then open:
 | PUT    | /api/units/{id} | Update a unit |
 | DELETE | /api/units/{id} | Delete a unit |
 
+### Suppliers
+
+| Method | Route               | Description       |
+| ------ | ------------------- | ----------------- |
+| GET    | /api/suppliers      | Get all suppliers |
+| GET    | /api/suppliers/{id} | Get a supplier    |
+| POST   | /api/suppliers      | Create a supplier |
+| PUT    | /api/suppliers/{id} | Update a supplier |
+| DELETE | /api/suppliers/{id} | Delete a supplier |
+
+### Stock movements
+
+| Method | Route                    | Description             |
+| ------ | ------------------------ | ----------------------- |
+| GET    | /api/stockmovements      | Get all stock movements |
+| GET    | /api/stockmovements/{id} | Get a stock movement    |
+| POST   | /api/stockmovements      | Create a stock movement |
+
 ## Data model
 
-The application includes the following main entities:
+The main application entities are:
 
 - Product
 - Category
 - Unit
+- Supplier
+- StockMovement
 
-Each product contains the following key information:
+Each product includes fields such as:
 
 - product code
 - name and description
 - category relationship
 - unit relationship
+- supplier relationship
 - purchase price
 - selling price
 - opening stock
 - minimum stock level
-- active status
-- created and updated timestamps
+- active flag
+- timestamps for creation and update
+
+## Dashboard and inventory features
+
+The application includes a dedicated dashboard for operations and monitoring. It currently provides:
+
+- total products and category counts
+- low-stock totals
+- reorder suggestions
+- stock movement summary analytics
+- inventory health overview
+
+The dashboard is designed to surface operational issues quickly and help with replenishment decisions.
 
 ## Architecture
 
@@ -203,17 +305,30 @@ flowchart LR
     User[User] --> Frontend[React + Vite + Tailwind]
     Frontend --> API[ASP.NET Core Web API]
     API --> DB[(SQL Server)]
+    API --> Domain[Domain Entities + EF Core]
+```
+
+## Database and migrations
+
+Entity Framework Core is used for persistence and schema management. The project includes migration files under the backend ProductApi Migrations folder.
+
+Common commands:
+
+```bash
+cd backend/ProductApi
+dotnet ef migrations add <MigrationName>
+dotnet ef database update
 ```
 
 ## Notes
 
-- CORS is enabled for the frontend running on localhost ports 5173 and 3000.
-- EF Core automatically applies pending migrations at startup.
-- Sample master data for categories and units is seeded into the database.
-- The app is designed for local development and demo use, but it can also be extended into a real inventory or catalog solution.
+- CORS is configured for the local React dev server and Docker ports.
+- EF Core migrations are applied automatically during startup in development.
+- The project includes seeded category and unit data for quick demo usage.
+- The app is intended for local development, demos, and extension into a larger business inventory system.
 
-## GitHub project description
+## GitHub project summary
 
-Product CRUD is a full-stack inventory management application built with React, ASP.NET Core, SQL Server, and Tailwind CSS. It allows users to manage products, categories, and units through a clean interface and a reliable REST API. The app is designed as a simple but realistic business application, with stock, pricing, and catalog management features built in.
+Product CRUD Inventory Management System is a full-stack inventory application for tracking products, stock flow, and supplier operations. It pairs a modern React interface with an ASP.NET Core API and SQL Server database, providing a practical example of a business-facing inventory dashboard and management workflow.
 
-It includes a Docker Compose setup for running the database, API, and frontend together locally, making it easy to demo, test, and extend.
+It includes stock monitoring, low-stock alerts, reorder suggestions, and analytics so it can function beyond a simple CRUD demo and behave more like a real operations tool.
