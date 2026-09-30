@@ -1,6 +1,6 @@
 # Product CRUD Inventory Management System
 
-This project is a full-stack inventory management application built with React, ASP.NET Core, and SQL Server. It is designed for managing products, categories, units, suppliers, and stock movement activity in a clean, operational workflow.
+This project is a full-stack inventory management application built with React, ASP.NET Core, and SQL Server. It provides product, category, unit, supplier, and stock-movement management, along with inventory monitoring and JWT-based account registration and login.
 
 The application includes:
 
@@ -9,7 +9,8 @@ The application includes:
 - stock movement tracking
 - low-stock alerts and reorder suggestions
 - inventory dashboard analytics
-- seeded master data and EF Core migrations
+- ASP.NET Core Identity registration, login, and role assignment
+- EF Core migrations applied at API startup
 - Docker-based local development setup
 
 ## Overview
@@ -29,10 +30,12 @@ This gives a practical full-stack example of a business inventory application wi
 - .NET 10
 - Entity Framework Core
 - SQL Server 2022
-- React 18
-- Vite
+- React 19
+- Vite 8
 - Tailwind CSS
 - Axios
+- React Router
+- ASP.NET Core Identity and JWT bearer authentication
 - Docker Compose
 
 ## Features
@@ -55,11 +58,19 @@ This gives a practical full-stack example of a business inventory application wi
 
 ### Data management
 
-- Seeded catalog data for categories and units
+- Identity roles seeded at API startup: Admin, Manager, Staff, and Viewer
 - Database migrations managed through EF Core
 - Automatic migration application at API startup
 - Validation and confirmation dialogs in the UI
 - Toast notifications for user feedback
+
+### Authentication
+
+- Registration with first name, last name, mobile number, email, and password
+- Login using email and password
+- New accounts are assigned the Staff role by default
+- Access JWT persisted by the frontend and attached to API requests as a bearer token
+- Logout clears the locally stored session
 
 ## Project structure
 
@@ -81,6 +92,16 @@ product-crud-app/
 └── LICENSE
 ```
 
+## Prerequisites
+
+For the Docker workflow, install Docker Desktop with Docker Compose support.
+
+For local development without a containerized frontend/backend, install:
+
+- .NET 10 SDK
+- Node.js `^20.19.0` or `>=22.12.0`, plus npm
+- Docker Desktop or SQL Server 2022 (the default connection expects SQL Server on `localhost:1433`)
+
 ## Quick start with Docker Compose
 
 From the root folder, run:
@@ -89,69 +110,107 @@ From the root folder, run:
 docker compose up --build
 ```
 
-The app will start with:
+The Compose configuration starts SQL Server, the API, and the Vite development server. Once the services are healthy, open:
 
 - Frontend: http://localhost:5173
 - Backend API: http://localhost:9000/api/v1
-- Swagger: http://localhost:9000/swagger
-- SQL Server: localhost:1433
+- Swagger UI: http://localhost:9000/swagger
+- SQL Server: `localhost:1433`
 
-This compose setup runs the database, API, and UI together in one local workflow.
+The API applies pending EF Core migrations and seeds the Identity roles when it starts. Register an account through the UI to begin. To stop the services, run `docker compose down` from the repository root.
+
+The SQL Server service does not currently declare a persistent Docker volume. Treat this Compose database as disposable; recreating its container can remove its local data. Back up any data you need before removing containers.
+
+### Rebuild the API after backend changes
+
+The backend runs from a Docker image. After changing backend source code, rebuild and restart the service so the container uses the new code:
+
+```bash
+docker compose up -d --build backend
+```
 
 ## Local development
 
-### 1. Backend
+The Docker workflow above is the simplest way to run the full stack. To run the API and frontend as local processes while keeping SQL Server in Docker:
 
-Requirements:
-
-- .NET 10 SDK
-- SQL Server running locally or via Docker
+1. Start SQL Server:
 
 ```bash
-dotnet run --project backend/NFJ.InventoryManagementSystem.Api/NFJ.InventoryManagementSystem.Api.csproj
+docker compose up -d sql-server
 ```
 
-The API applies pending EF Core migrations on startup. To add a migration, run this from the repository root:
+2. Start the API from the repository root. The `http` launch profile listens on `http://127.0.0.1:8080`:
 
 ```bash
-dotnet ef migrations add MigrationName \
-  --project backend/NFJ.InventoryManagementSystem.Infrastructure/NFJ.InventoryManagementSystem.Infrastructure.csproj \
-  --startup-project backend/NFJ.InventoryManagementSystem.Api/NFJ.InventoryManagementSystem.Api.csproj \
-  --output-dir Persistence/Migrations
+dotnet run --project backend/NFJ.InventoryManagementSystem.Api/NFJ.InventoryManagementSystem.Api.csproj --launch-profile http
 ```
 
-### 2. Database
+3. In a second terminal, configure the frontend to use that local API, install dependencies, and start Vite:
 
-The application uses the default connection string in appsettings.json:
+PowerShell:
 
-```json
-"DefaultConnection": "Server=localhost,1433;Database=ProductCrudDb;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;MultipleActiveResultSets=true"
-```
-
-If you want to run SQL Server manually:
-
-```bash
-docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=YourStrong@Passw0rd" \
-  -p 1433:1433 --name sql-server -d mcr.microsoft.com/mssql/server:2022-latest
-```
-
-### 3. Frontend
-
-Requirements:
-
-- Node.js 18+
-
-```bash
+```powershell
 cd frontend/product-crud-client
+$env:VITE_API_BASE_URL = "http://localhost:8080/api"
 npm install
 npm run dev
 ```
 
-Then open:
+Bash:
 
-- http://localhost:5173
+```bash
+cd frontend/product-crud-client
+VITE_API_BASE_URL=http://localhost:8080/api npm run dev
+```
+
+Vite uses port `5173` and is configured to fail if the port is already occupied. The frontend's API default is `http://localhost:9000/api`, which is appropriate when using the Compose API.
+
+4. Open http://localhost:5173. The API's Swagger UI is available at http://127.0.0.1:8080/swagger when running with the Development environment.
+
+### Frontend build
+
+From `frontend/product-crud-client`:
+
+```bash
+npm install
+npm run build
+```
+
+Vite writes the production build to `frontend/product-crud-client/dist`.
+
+## Authentication and authorization
+
+The API uses ASP.NET Core Identity for accounts and roles, and signs JWT bearer access tokens for successful registration and login. The frontend stores the returned access token in `localStorage` and sends it as `Authorization: Bearer <token>` on its API requests.
+
+Authentication endpoints are available with and without the `/v1` segment:
+
+| Method | Route                   | Access        | Description                                  |
+| ------ | ----------------------- | ------------- | -------------------------------------------- |
+| POST   | `/api/v1/auth/register` | Anonymous     | Create an account and return an access token |
+| POST   | `/api/v1/auth/login`    | Anonymous     | Sign in and return an access token           |
+| GET    | `/api/v1/auth/me`       | Authenticated | Return the current user's identity and roles |
+
+Example registration request:
+
+```json
+{
+  "firstName": "Jane",
+  "lastName": "Doe",
+  "phoneNumber": "+1 555 123 4567",
+  "email": "jane@example.com",
+  "password": "ExamplePass123"
+}
+```
+
+Passwords must be at least eight characters and contain uppercase, lowercase, and numeric characters. Non-alphanumeric characters are not required. Email addresses must be unique. New accounts receive the `Staff` role by default; the API seeds the `Admin`, `Manager`, `Staff`, and `Viewer` roles.
+
+**Authorization status:** the `/me` endpoint requires a valid access token. The inventory CRUD controllers do not currently have `[Authorize]` attributes, so their routes are not protected by authentication or role policies yet. Hiding UI actions based on a role is not a security boundary; enforce permissions in the API before exposing this app to untrusted users.
+
+Refresh tokens are not implemented. When an access token expires, the user must sign in again. The development JWT signing key in `appsettings.json` is not suitable for production; provide a unique secret through secure deployment configuration and never commit production credentials. The current browser storage uses `localStorage`, which is accessible to JavaScript; review the token storage design and XSS protections before production use.
 
 ## Main API endpoints
+
+All resource routes support both versioned paths such as `/api/v1/products` and unversioned compatibility paths such as `/api/products`. The examples below use the versioned routes.
 
 ### Products
 
@@ -210,6 +269,7 @@ The main application entities are:
 - Unit
 - Supplier
 - StockMovement
+- ASP.NET Core Identity users, roles, and account metadata
 
 Each product includes fields such as:
 
@@ -258,6 +318,8 @@ Entity Framework Core and SQL Server are owned by the Infrastructure project. Mi
 Common commands:
 
 ```bash
+dotnet tool install --global dotnet-ef
+
 dotnet ef migrations add <MigrationName> \
   --project backend/NFJ.InventoryManagementSystem.Infrastructure/NFJ.InventoryManagementSystem.Infrastructure.csproj \
   --startup-project backend/NFJ.InventoryManagementSystem.Api/NFJ.InventoryManagementSystem.Api.csproj \
@@ -268,12 +330,24 @@ dotnet ef database update \
   --startup-project backend/NFJ.InventoryManagementSystem.Api/NFJ.InventoryManagementSystem.Api.csproj
 ```
 
+Run these commands from the repository root. Install the `dotnet-ef` tool only if it is not already available. The default development connection string targets SQL Server at `localhost:1433`; override `ConnectionStrings__DefaultConnection` for a different database. The API applies migrations automatically when it starts, so a separate `database update` is generally unnecessary for a running development instance.
+
+## Troubleshooting
+
+- **Frontend says the API cannot be reached:** verify that the API is running and that `VITE_API_BASE_URL` points to it. Compose uses `http://localhost:9000/api`; a locally launched API uses `http://localhost:8080/api` by default.
+- **Port 5173 is already in use:** stop the process using that port. Vite has `strictPort` enabled and will not silently choose another port.
+- **Backend changes do not appear in Docker:** rebuild the API image with `docker compose up -d --build backend`, then inspect startup output with `docker compose logs -f backend`.
+- **API fails during startup or migrations:** check that SQL Server is healthy with `docker compose ps` and inspect database/API logs with `docker compose logs sql-server backend`.
+- **Registration fails:** confirm the email is unused and the password meets the minimum length and character requirements. The registration form requires a mobile number.
+- **401 from an authenticated endpoint:** sign in again to obtain a current access token. Refresh-token renewal is not currently supported.
+
 ## Notes
 
 - CORS is configured for the local React dev server and Docker ports.
 - EF Core migrations are applied automatically during API startup.
-- The project includes seeded category and unit data for quick demo usage.
-- The app is intended for local development, demos, and extension into a larger business inventory system.
+- Identity roles are created at startup; user accounts are created through registration.
+- The default database credentials and JWT signing key are for local development only.
+- The app is intended for local development and demos; complete API authorization and production credential hardening before deployment.
 
 ## GitHub project summary
 
