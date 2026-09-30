@@ -8,12 +8,15 @@ import CategoryForm from './components/CategoryForm.jsx'
 import UnitForm from './components/UnitForm.jsx'
 import SupplierForm from './components/SupplierForm.jsx'
 import StockMovementForm from './components/StockMovementForm.jsx'
+import LoginPage from './pages/LoginPage.jsx'
+import RegisterPage from './pages/RegisterPage.jsx'
 import ProductsPage from './pages/ProductsPage.jsx'
 import DashboardPage from './pages/DashboardPage.jsx'
 import CategoriesPage from './pages/CategoriesPage.jsx'
 import UnitsPage from './pages/UnitsPage.jsx'
 import SuppliersPage from './pages/SuppliersPage.jsx'
 import StockMovementsPage from './pages/StockMovementsPage.jsx'
+import { clearStoredAuth, getStoredAuth, login as loginUser, register as registerUser } from './services/authService.js'
 import {
 
   getCategories,
@@ -92,8 +95,35 @@ export default function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
   const [toast, setToast] = useState(null)
+  const [auth, setAuth] = useState(() => getStoredAuth())
+
+  const isAuthenticated = Boolean(auth?.token)
 
   const showToast = (message, type = 'success') => setToast({ message, type })
+
+  const handleLogin = async (credentials) => {
+    const session = await loginUser(credentials)
+    setAuth(session)
+    return session
+  }
+
+  const handleRegister = async (credentials) => {
+    const session = await registerUser(credentials)
+    setAuth(session)
+    return session
+  }
+
+  const handleLogout = () => {
+    clearStoredAuth()
+    setAuth(null)
+    navigate('/login', { replace: true })
+  }
+
+  useEffect(() => {
+    if (isAuthenticated && (location.pathname === '/login' || location.pathname === '/register')) {
+      navigate('/dashboard', { replace: true })
+    }
+  }, [isAuthenticated, location.pathname, navigate])
 
   const loadCurrentPageData = async () => {
     setIsLoading(true)
@@ -150,8 +180,9 @@ export default function App() {
   }
 
   useEffect(() => {
+    if (!isAuthenticated) return
     loadCurrentPageData()
-  }, [activeTab])
+  }, [activeTab, isAuthenticated])
 
   useEffect(() => {
     setIsSidebarOpen(false)
@@ -473,6 +504,18 @@ export default function App() {
     </Routes>
   )
 
+  const renderAuthPage = () => (
+    <Routes>
+      <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
+      <Route path="/register" element={<RegisterPage onRegister={handleRegister} />} />
+      <Route path="*" element={<Navigate to="/login" replace />} />
+    </Routes>
+  )
+
+  if (!isAuthenticated) {
+    return renderAuthPage()
+  }
+
   return (
     <div className="min-h-screen bg-paper">
       <div className="mx-auto max-w-7xl px-3 py-4 sm:px-4 lg:px-5">
@@ -547,6 +590,9 @@ export default function App() {
                   </div>
 
                   <div className="flex flex-wrap items-center gap-2">
+                    <div className="rounded-full border border-ledger/20 bg-ledger/5 px-3 py-1.5 text-xs font-medium text-ledger">
+                      {auth?.roles?.[0] ?? 'Staff'}
+                    </div>
                     <div className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-800">
                       Low stock: {lowStockProducts.length}
                     </div>
@@ -560,6 +606,12 @@ export default function App() {
                     >
                       <RefreshCw className="h-3.5 w-3.5" />
                       Refresh
+                    </button>
+                    <button
+                      onClick={handleLogout}
+                      className="rounded-full border border-stone/30 bg-white px-3 py-1.5 text-xs font-medium text-stone transition-colors hover:text-ink hover:bg-paper"
+                    >
+                      Logout
                     </button>
                   </div>
                 </div>

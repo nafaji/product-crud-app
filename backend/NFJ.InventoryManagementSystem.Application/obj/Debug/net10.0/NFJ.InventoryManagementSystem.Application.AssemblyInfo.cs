@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("NFJ.InventoryManagementSystem.Application")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+d092b938ea9c1124e092ee6c38bff307629e1466")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+bf1fcac3d0e32950e6d0b6dcf04e2800946c9ead")]
 [assembly: System.Reflection.AssemblyProductAttribute("NFJ.InventoryManagementSystem.Application")]
 [assembly: System.Reflection.AssemblyTitleAttribute("NFJ.InventoryManagementSystem.Application")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

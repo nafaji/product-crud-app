@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using NFJ.InventoryManagementSystem.Application.Common.Identity;
 using NFJ.InventoryManagementSystem.Domain.Entities;
 
 namespace NFJ.InventoryManagementSystem.Infrastructure.Persistence.Context
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : IdentityDbContext<AppUser>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
         {
@@ -17,6 +19,8 @@ namespace NFJ.InventoryManagementSystem.Infrastructure.Persistence.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
             var seedDate = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
             var electronicsCategory = new Category

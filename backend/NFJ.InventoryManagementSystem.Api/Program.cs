@@ -1,6 +1,9 @@
+using System.Text;
 using Asp.Versioning;
 using Asp.Versioning.ApiExplorer;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.IdentityModel.Tokens;
 using NFJ.InventoryManagementSystem.Api;
 using NFJ.InventoryManagementSystem.Application.Common.Exceptions;
 using NFJ.InventoryManagementSystem.Application.Services;
@@ -32,6 +35,32 @@ builder.Services.AddScoped<ICategoriesService, CategoriesService>();
 builder.Services.AddScoped<ISuppliersService, SuppliersService>();
 builder.Services.AddScoped<IUnitsService, UnitsService>();
 builder.Services.AddScoped<IStockMovementsService, StockMovementsService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+
+var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT key is not configured.");
+var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "NFJ.InventoryManagementSystem";
+var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "NFJ.InventoryManagementSystem";
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtIssuer,
+        ValidAudience = jwtAudience,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+    };
+});
+
+builder.Services.AddAuthorization();
 
 // Allow the React dev server (Vite default ports) to call this API
 builder.Services.AddCors(options =>
@@ -76,6 +105,7 @@ app.UseExceptionHandler(errorApp =>
 });
 
 await app.Services.ApplyDatabaseMigrationsAsync();
+await app.Services.SeedIdentityAsync();
 
 // --- Middleware pipeline ---
 if (app.Environment.IsDevelopment())
@@ -95,6 +125,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors("AllowReactApp");
+app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 
