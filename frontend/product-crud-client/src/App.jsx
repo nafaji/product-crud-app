@@ -15,19 +15,27 @@ import UnitsPage from './pages/UnitsPage.jsx'
 import SuppliersPage from './pages/SuppliersPage.jsx'
 import StockMovementsPage from './pages/StockMovementsPage.jsx'
 import {
-  getProducts,
-  createProduct,
-  updateProduct,
-  deleteProduct,
+
   getCategories,
   createCategory,
   updateCategory,
   deleteCategory,
+ 
+} from './services/categoryService.js'
+import {
+  getProducts,
+  createProduct,
+  updateProduct,
+  deleteProduct,
+  
+} from './services/productService.js'
+import {
+
   getUnits,
   createUnit,
   updateUnit,
   deleteUnit,
-} from './services/productService.js'
+} from './services/unitService.js'
 import {
   getSuppliers,
   createSupplier,

@@ -57,94 +57,28 @@ This gives a practical full-stack example of a business inventory application wi
 
 - Seeded catalog data for categories and units
 - Database migrations managed through EF Core
-- Automatic migration application at startup in development
+- Automatic migration application at API startup
 - Validation and confirmation dialogs in the UI
 - Toast notifications for user feedback
 
 ## Project structure
 
+The backend follows Clean Architecture. Domain contains the entities and has no project dependencies. Application contains use cases, request/response DTOs, repository abstractions, and the Unit of Work contract. Infrastructure implements persistence with EF Core and SQL Server. The API contains HTTP controllers and composes the layers; controllers return response DTOs rather than domain entities.
+
 ```text
 product-crud-app/
 ├── backend/
-│   ├── InventoryManagementSystem.Domain/
-│   │   ├── Entities/
-│   │   │   ├── Category.cs
-│   │   │   ├── Product.cs
-│   │   │   ├── StockMovement.cs
-│   │   │   ├── Supplier.cs
-│   │   │   └── Unit.cs
-│   │   └── InventoryManagementSystem.Domain.csproj
-│   └── ProductApi/
-│       ├── Controllers/
-│       │   ├── CategoriesController.cs
-│       │   ├── ProductsController.cs
-│       │   ├── StockMovementsController.cs
-│       │   ├── SuppliersController.cs
-│       │   └── UnitsController.cs
-│       ├── Data/
-│       │   └── ApplicationDbContext.cs
-│       ├── DTOs/
-│       │   ├── CategoryDto.cs
-│       │   ├── ProductDto.cs
-│       │   ├── StockMovementDto.cs
-│       │   ├── SupplierDto.cs
-│       │   └── UnitDto.cs
-│       ├── Migrations/
-│       │   ├── 20260912155317_InitialCreate.cs
-│       │   ├── 20260912155317_InitialCreate.Designer.cs
-│       │   ├── 20260912164054_AddInventorySupport.cs
-│       │   ├── 20260912164054_AddInventorySupport.Designer.cs
-│       │   ├── 20260913150229_AddMoreUnits.cs
-│       │   ├── 20260913150229_AddMoreUnits.Designer.cs
-│       │   └── ApplicationDbContextModelSnapshot.cs
-│       ├── Properties/
-│       │   └── launchSettings.json
-│       ├── Program.cs
-│       ├── appsettings.json
-│       ├── appsettings.Development.json
-│       ├── ProductApi.csproj
-│       └── Dockerfile
+│   ├── NFJ.InventoryManagementSystem.Domain/         # Entities and domain rules
+│   ├── NFJ.InventoryManagementSystem.Application/    # Use cases, DTOs, repository/UoW contracts
+│   ├── NFJ.InventoryManagementSystem.Infrastructure/ # EF Core, repository/UoW implementations, migrations
+│   ├── NFJ.InventoryManagementSystem.Api/             # Controllers and composition root
+│   └── NFJ.InventoryManagementSystem.slnx
 ├── frontend/
 │   └── product-crud-client/
-│       ├── src/
-│       │   ├── components/
-│       │   │   ├── CategoryForm.jsx
-│       │   │   ├── CategoryTable.jsx
-│       │   │   ├── ConfirmDialog.jsx
-│       │   │   ├── ProductForm.jsx
-│       │   │   ├── ProductTable.jsx
-│       │   │   ├── StockMovementForm.jsx
-│       │   │   ├── StockMovementTable.jsx
-│       │   │   ├── SupplierForm.jsx
-│       │   │   ├── SupplierTable.jsx
-│       │   │   ├── Toast.jsx
-│       │   │   ├── UnitForm.jsx
-│       │   │   └── UnitTable.jsx
-│       │   ├── pages/
-│       │   │   ├── CategoriesPage.jsx
-│       │   │   ├── DashboardPage.jsx
-│       │   │   ├── ProductsPage.jsx
-│       │   │   ├── StockMovementsPage.jsx
-│       │   │   ├── SuppliersPage.jsx
-│       │   │   └── UnitsPage.jsx
-│       │   ├── services/
-│       │   │   ├── inventoryService.js
-│       │   │   └── productService.js
-│       │   ├── App.jsx
-│       │   ├── index.css
-│       │   └── main.jsx
-│       ├── index.html
-│       ├── package.json
-│       ├── postcss.config.js
-│       ├── tailwind.config.js
-│       ├── vite.config.js
-│       └── Dockerfile
+│       └── src/
 ├── docker-compose.yml
-├── .gitignore
-├── .dockerignore
 ├── README.md
-├── LICENSE
-└── .vscode/
+└── LICENSE
 ```
 
 ## Quick start with Docker Compose
@@ -158,8 +92,8 @@ docker compose up --build
 The app will start with:
 
 - Frontend: http://localhost:5173
-- Backend API: http://localhost:8080
-- Swagger: http://localhost:8080/swagger
+- Backend API: http://localhost:9000/api/v1
+- Swagger: http://localhost:9000/swagger
 - SQL Server: localhost:1433
 
 This compose setup runs the database, API, and UI together in one local workflow.
@@ -174,12 +108,17 @@ Requirements:
 - SQL Server running locally or via Docker
 
 ```bash
-cd backend/ProductApi
-dotnet restore
-dotnet run
+dotnet run --project backend/NFJ.InventoryManagementSystem.Api/NFJ.InventoryManagementSystem.Api.csproj
 ```
 
-The API is configured to automatically apply pending EF Core migrations on startup.
+The API applies pending EF Core migrations on startup. To add a migration, run this from the repository root:
+
+```bash
+dotnet ef migrations add MigrationName \
+  --project backend/NFJ.InventoryManagementSystem.Infrastructure/NFJ.InventoryManagementSystem.Infrastructure.csproj \
+  --startup-project backend/NFJ.InventoryManagementSystem.Api/NFJ.InventoryManagementSystem.Api.csproj \
+  --output-dir Persistence/Migrations
+```
 
 ### 2. Database
 
@@ -216,51 +155,51 @@ Then open:
 
 ### Products
 
-| Method | Route              | Description          |
-| ------ | ------------------ | -------------------- |
-| GET    | /api/products      | Get all products     |
-| GET    | /api/products/{id} | Get a single product |
-| POST   | /api/products      | Create a product     |
-| PUT    | /api/products/{id} | Update a product     |
-| DELETE | /api/products/{id} | Delete a product     |
+| Method | Route                 | Description          |
+| ------ | --------------------- | -------------------- |
+| GET    | /api/v1/products      | Get all products     |
+| GET    | /api/v1/products/{id} | Get a single product |
+| POST   | /api/v1/products      | Create a product     |
+| PUT    | /api/v1/products/{id} | Update a product     |
+| DELETE | /api/v1/products/{id} | Delete a product     |
 
 ### Categories
 
-| Method | Route                | Description        |
-| ------ | -------------------- | ------------------ |
-| GET    | /api/categories      | Get all categories |
-| GET    | /api/categories/{id} | Get a category     |
-| POST   | /api/categories      | Create a category  |
-| PUT    | /api/categories/{id} | Update a category  |
-| DELETE | /api/categories/{id} | Delete a category  |
+| Method | Route                   | Description        |
+| ------ | ----------------------- | ------------------ |
+| GET    | /api/v1/categories      | Get all categories |
+| GET    | /api/v1/categories/{id} | Get a category     |
+| POST   | /api/v1/categories      | Create a category  |
+| PUT    | /api/v1/categories/{id} | Update a category  |
+| DELETE | /api/v1/categories/{id} | Delete a category  |
 
 ### Units
 
-| Method | Route           | Description   |
-| ------ | --------------- | ------------- |
-| GET    | /api/units      | Get all units |
-| GET    | /api/units/{id} | Get a unit    |
-| POST   | /api/units      | Create a unit |
-| PUT    | /api/units/{id} | Update a unit |
-| DELETE | /api/units/{id} | Delete a unit |
+| Method | Route              | Description   |
+| ------ | ------------------ | ------------- |
+| GET    | /api/v1/units      | Get all units |
+| GET    | /api/v1/units/{id} | Get a unit    |
+| POST   | /api/v1/units      | Create a unit |
+| PUT    | /api/v1/units/{id} | Update a unit |
+| DELETE | /api/v1/units/{id} | Delete a unit |
 
 ### Suppliers
 
-| Method | Route               | Description       |
-| ------ | ------------------- | ----------------- |
-| GET    | /api/suppliers      | Get all suppliers |
-| GET    | /api/suppliers/{id} | Get a supplier    |
-| POST   | /api/suppliers      | Create a supplier |
-| PUT    | /api/suppliers/{id} | Update a supplier |
-| DELETE | /api/suppliers/{id} | Delete a supplier |
+| Method | Route                  | Description       |
+| ------ | ---------------------- | ----------------- |
+| GET    | /api/v1/suppliers      | Get all suppliers |
+| GET    | /api/v1/suppliers/{id} | Get a supplier    |
+| POST   | /api/v1/suppliers      | Create a supplier |
+| PUT    | /api/v1/suppliers/{id} | Update a supplier |
+| DELETE | /api/v1/suppliers/{id} | Delete a supplier |
 
 ### Stock movements
 
-| Method | Route                    | Description             |
-| ------ | ------------------------ | ----------------------- |
-| GET    | /api/stockmovements      | Get all stock movements |
-| GET    | /api/stockmovements/{id} | Get a stock movement    |
-| POST   | /api/stockmovements      | Create a stock movement |
+| Method | Route                                      | Description                 |
+| ------ | ------------------------------------------ | --------------------------- |
+| GET    | /api/v1/stockmovements                     | Get all stock movements     |
+| GET    | /api/v1/stockmovements/product/{productId} | Get movements for a product |
+| POST   | /api/v1/stockmovements                     | Create a stock movement     |
 
 ## Data model
 
@@ -303,27 +242,36 @@ The dashboard is designed to surface operational issues quickly and help with re
 ```mermaid
 flowchart LR
     User[User] --> Frontend[React + Vite + Tailwind]
-    Frontend --> API[ASP.NET Core Web API]
-    API --> DB[(SQL Server)]
-    API --> Domain[Domain Entities + EF Core]
+  Frontend --> API[ASP.NET Core API]
+  API --> Application[Application: use cases and DTOs]
+  API --> Infrastructure[Infrastructure: persistence adapters]
+  Application --> Domain[Domain: entities and rules]
+  Infrastructure --> Application
+  Infrastructure --> Domain
+  Infrastructure --> DB[(SQL Server)]
 ```
 
 ## Database and migrations
 
-Entity Framework Core is used for persistence and schema management. The project includes migration files under the backend ProductApi Migrations folder.
+Entity Framework Core and SQL Server are owned by the Infrastructure project. Migrations are stored in `backend/NFJ.InventoryManagementSystem.Infrastructure/Persistence/Migrations`; the API applies pending migrations at startup.
 
 Common commands:
 
 ```bash
-cd backend/ProductApi
-dotnet ef migrations add <MigrationName>
-dotnet ef database update
+dotnet ef migrations add <MigrationName> \
+  --project backend/NFJ.InventoryManagementSystem.Infrastructure/NFJ.InventoryManagementSystem.Infrastructure.csproj \
+  --startup-project backend/NFJ.InventoryManagementSystem.Api/NFJ.InventoryManagementSystem.Api.csproj \
+  --output-dir Persistence/Migrations
+
+dotnet ef database update \
+  --project backend/NFJ.InventoryManagementSystem.Infrastructure/NFJ.InventoryManagementSystem.Infrastructure.csproj \
+  --startup-project backend/NFJ.InventoryManagementSystem.Api/NFJ.InventoryManagementSystem.Api.csproj
 ```
 
 ## Notes
 
 - CORS is configured for the local React dev server and Docker ports.
-- EF Core migrations are applied automatically during startup in development.
+- EF Core migrations are applied automatically during API startup.
 - The project includes seeded category and unit data for quick demo usage.
 - The app is intended for local development, demos, and extension into a larger business inventory system.
 

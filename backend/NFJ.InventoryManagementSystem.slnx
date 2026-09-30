@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="NFJ.InventoryManagementSystem.Api/NFJ.InventoryManagementSystem.Api.csproj" />
+  <Project Path="NFJ.InventoryManagementSystem.Application/NFJ.InventoryManagementSystem.Application.csproj" />
+  <Project Path="NFJ.InventoryManagementSystem.Domain/NFJ.InventoryManagementSystem.Domain.csproj" />
+  <Project Path="NFJ.InventoryManagementSystem.Infrastructure/NFJ.InventoryManagementSystem.Infrastructure.csproj" Id="ef209c0c-96b7-4fbd-b178-2a517ffb24f8" />
+</Solution>

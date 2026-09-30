@@ -21,8 +21,8 @@ services:
 
   backend:
     build:
-      context: .
-      dockerfile: ./backend/ProductApi/Dockerfile
+      context: ./backend
+      dockerfile: NFJ.InventoryManagementSystem.Api/Dockerfile
     container_name: product-api
     depends_on:
       sql-server:
@@ -32,7 +32,7 @@ services:
       ASPNETCORE_URLS: http://+:8080
       ConnectionStrings__DefaultConnection: "Server=sql-server,1433;Database=ProductCrudDb;User Id=sa;Password=YourStrong@Passw0rd;TrustServerCertificate=True;MultipleActiveResultSets=true"
     ports:
-      - "8080:8080"
+      - "${API_PORT:-9000}:8080"
     restart: unless-stopped
 
   frontend:
@@ -44,7 +44,7 @@ services:
       backend:
         condition: service_started
     environment:
-      VITE_API_BASE_URL: http://localhost:8080/api
+      VITE_API_BASE_URL: http://localhost:${API_PORT:-9000}/api
     ports:
       - "5173:5173"
     command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
