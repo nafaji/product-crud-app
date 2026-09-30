@@ -74,23 +74,60 @@ This gives a practical full-stack example of a business inventory application wi
 
 ## Project structure
 
-The backend follows Clean Architecture. Domain contains the entities and has no project dependencies. Application contains use cases, request/response DTOs, repository abstractions, and the Unit of Work contract. Infrastructure implements persistence with EF Core and SQL Server. The API contains HTTP controllers and composes the layers; controllers return response DTOs rather than domain entities.
+The backend is divided into four .NET projects. The Domain project contains the core inventory entities; Application defines service contracts, DTOs, and use-case services; Infrastructure implements repositories and SQL Server persistence; and Api hosts the HTTP endpoints and configures the application. The frontend separates route-level screens, reusable UI components, and API service modules.
 
 ```text
 product-crud-app/
 ├── backend/
-│   ├── NFJ.InventoryManagementSystem.Domain/         # Entities and domain rules
-│   ├── NFJ.InventoryManagementSystem.Application/    # Use cases, DTOs, repository/UoW contracts
-│   ├── NFJ.InventoryManagementSystem.Infrastructure/ # EF Core, repository/UoW implementations, migrations
-│   ├── NFJ.InventoryManagementSystem.Api/             # Controllers and composition root
-│   └── NFJ.InventoryManagementSystem.slnx
+│   ├── NFJ.InventoryManagementSystem.Api/
+│   │   ├── Controllers/                               # Auth, products, categories, units, suppliers, stock
+│   │   ├── Properties/launchSettings.json             # Local HTTP/HTTPS profiles
+│   │   ├── Program.cs                                  # DI, API versioning, JWT, CORS, Swagger, middleware
+│   │   ├── appsettings*.json                           # Local configuration
+│   │   └── Dockerfile                                  # API container build
+│   ├── NFJ.InventoryManagementSystem.Application/
+│   │   ├── Common/
+│   │   │   ├── Exceptions/                            # Application-level exceptions
+│   │   │   ├── Identity/                               # AppUser identity extension
+│   │   │   └── Interfaces/                             # Repository and Unit of Work contracts
+│   │   ├── DTOs/                                       # API/service request and response contracts
+│   │   ├── Mapping/                                    # Inventory response mapping
+│   │   └── Services/                                   # Inventory and authentication use cases
+│   ├── NFJ.InventoryManagementSystem.Domain/
+│   │   └── Entities/                                   # Product, category, unit, supplier, stock movement
+│   ├── NFJ.InventoryManagementSystem.Infrastructure/
+│   │   ├── Persistence/
+│   │   │   ├── Context/                                # EF Core context and Unit of Work
+│   │   │   └── Migrations/                             # Database schema history and model snapshot
+│   │   ├── Repositories/                               # EF Core repository implementations
+│   │   └── DependencyInjection.cs                      # Infrastructure and Identity registration
+│   └── NFJ.InventoryManagementSystem.slnx              # .NET solution
 ├── frontend/
 │   └── product-crud-client/
-│       └── src/
+│       ├── src/
+│       │   ├── components/                             # Forms, tables, dialogs, charts, notifications
+│       │   ├── pages/                                  # Dashboard, inventory pages, login, registration
+│       │   ├── services/                               # Axios clients and resource/auth API calls
+│       │   ├── App.jsx                                 # Application shell, navigation, auth state
+│       │   ├── main.jsx                                # React entry point and router setup
+│       │   └── index.css                               # Tailwind layers and global styles
+│       ├── package.json                                # Frontend scripts and dependencies
+│       ├── vite.config.js                              # Vite host and port configuration
+│       └── tailwind.config.js                           # Tailwind theme and content paths
 ├── docker-compose.yml
+├── .gitignore
 ├── README.md
-└── LICENSE
+└── package-lock.json                                   # Root lockfile
 ```
+
+### Layer responsibilities
+
+- **API:** Handles HTTP routing, API versioning, Swagger, CORS, authentication middleware, and dependency composition. Controllers translate HTTP requests into Application service calls.
+- **Application:** Holds business workflows and service contracts, request/response DTOs, identity-aware account services, and repository abstractions. It coordinates operations without owning EF Core persistence.
+- **Domain:** Defines inventory entities and domain state. It does not depend on the API or Infrastructure projects.
+- **Infrastructure:** Implements persistence using EF Core and SQL Server, provides repositories and Identity stores, and owns database migrations.
+- **Frontend:** `pages/` compose user workflows, `components/` provide reusable UI, and `services/` call the backend API. `App.jsx` owns navigation and the current client-side authentication session.
+- **Docker Compose:** Runs SQL Server, the API container, and the Vite development server for local full-stack development.
 
 ## Prerequisites
 
@@ -348,9 +385,3 @@ Run these commands from the repository root. Install the `dotnet-ef` tool only i
 - Identity roles are created at startup; user accounts are created through registration.
 - The default database credentials and JWT signing key are for local development only.
 - The app is intended for local development and demos; complete API authorization and production credential hardening before deployment.
-
-## GitHub project summary
-
-Product CRUD Inventory Management System is a full-stack inventory application for tracking products, stock flow, and supplier operations. It pairs a modern React interface with an ASP.NET Core API and SQL Server database, providing a practical example of a business-facing inventory dashboard and management workflow.
-
-It includes stock monitoring, low-stock alerts, reorder suggestions, and analytics so it can function beyond a simple CRUD demo and behave more like a real operations tool.
